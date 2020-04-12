@@ -6,4 +6,6 @@
 from ._astropy_init import *   # noqa
 # ----------------------------------------------------------------------------
 
-__all__ = []
+from .core import *  # noqa
+from .linalg import *  # noqa
+from .planets import *  # noqa
