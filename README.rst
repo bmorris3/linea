@@ -13,7 +13,7 @@ linea
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
-Linear light curve detrending for CHEOPS.
+Linear light curve detrending for `CHEOPS <https://cheops.unibe.ch>`_.
 
 License
 -------
@@ -28,5 +28,9 @@ more information.
 Contributing
 ------------
 
-We love contributions! linea is open source,
-built on open source, and we'd love to have you hang out in our community.
+We love contributions! linea is open source, built on open source, and we'd love
+to have you in our community. To contribute to ``linea``, please follow the
+`Astropy dev guidelines <https://docs.astropy.org/en/stable/development/workflow/development_workflow.html>`_
+to make a code contribution. Please report any issues or requests for support
+via the
+`GitHub Issue tracker <https://github.com/bmorris3/linea/issues>`_.
