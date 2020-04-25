@@ -29,8 +29,12 @@ class CheopsLightCurve(object):
         """
         Parameters
         ----------
-        record_array : `~astropy.io.fits.fitsrec.FITS_rec`
+        record_array : `~numpy.recarray`
+            Record array of column vectors and their labels (names). Often
+            this record array comes straight from a FITS file.
         norm : bool
+            Normalize the fluxes such that the median flux is unity. Default is
+            True.
         """
         self.recs = record_array
 
@@ -53,18 +57,23 @@ class CheopsLightCurve(object):
         Parameters
         ----------
         path : str
+            Path to the FITS file containing the data to load.
         norm : bool
+            Normalize the fluxes such that the median flux is unity. Default is
+            True.
         """
         return cls(fits.getdata(path), norm=norm)
 
     @classmethod
     def from_example(cls, norm=True):
         """
-        Load example 55 Cnc e light curve.
+        Load example 55 Cnc e light curve (**NOTE**: this is not real data).
 
         Parameters
         ----------
         norm : bool
+            Normalize the fluxes such that the median flux is unity. Default is
+            True.
         """
         path = os.path.join(os.path.dirname(__file__), 'data', 'example.fits')
         return cls.from_fits(path, norm=norm)
@@ -75,12 +84,14 @@ class CheopsLightCurve(object):
 
         Parameters
         ----------
-        ax : `~matplotlib.pyplot.Axes`
+        ax : `~matplotlib.axes.Axes`
+            Matplotlib axis instance on which to build the plot
         kwargs: dict
-
+            Further keyword arguments to pass to `~matplotlib.pyplot.plot`.
         Returns
         -------
-        ax : `~matplotlib.pyplot.Axes`
+        ax : `~matplotlib.axes.Axes`
+            Matplotlib axis instance with the light curve plotted on it.
         """
         if ax is None:
             ax = plt.gca()
@@ -96,11 +107,13 @@ class CheopsLightCurve(object):
 
         Parameters
         ----------
-        norm : bool
-
+         norm : bool
+            Normalize the column vectors within the design matrix such that they
+            have mean=zero and range=unity.
         Returns
         -------
         X : `~numpy.ndarray`
+            Design matrix (concatenated column vectors of observables)
         """
         if norm:
             X = np.vstack([
@@ -134,6 +147,18 @@ class CheopsLightCurve(object):
         return X[~self.mask]
 
     def sigma_clip_centroid(self, sigma=3.5, plot=False):
+        """
+        Sigma-clip the light curve on centroid position (update mask).
+
+        Parameters
+        ----------
+        sigma : float
+            Factor of standard deviations away from the median centroid position
+            to clip on.
+        plot : bool
+            Plot the accepted centroids (in black) and the centroids of the
+            rejected fluxes (in red).
+        """
         x_mean = np.median(self.centroid_x)
         y_mean = np.median(self.centroid_y)
         x_std = mad_std(self.centroid_x)
@@ -156,14 +181,21 @@ class CheopsLightCurve(object):
     def sigma_clip_flux(self, sigma_upper=4, sigma_lower=4, maxiters=None,
                         plot=False):
         """
-        Sigma-clip the light curve (update mask).
+        Sigma-clip the light curve on fluxes (update mask).
 
         Parameters
         ----------
         sigma_upper : float
+            Factor of standard deviations above the median centroid position
+            to clip on.
         sigma_lower : float
+            Factor of standard deviations below the median centroid position
+            to clip on.
         maxiters : float or None
+            Number of sigma-clipping iterations. Default is None, which repeats
+            until there are no outliers left.
         plot : float
+            Plot the accepted fluxes (in black) and the rejected fluxes (in red)
         """
         sc = SigmaClip(sigma_upper=sigma_upper, sigma_lower=sigma_lower,
                        stdfunc=mad_std, maxiters=maxiters)
@@ -182,13 +214,15 @@ class CheopsLightCurve(object):
         Parameters
         ----------
         design_matrix : `~numpy.ndarray`
+            Design matrix (concatenated column vectors of observables)
 
         Returns
         -------
         betas : `~numpy.ndarray`
-
+            Least squares estimators :math:`\hat{\beta}`
         cov : `~numpy.ndarray`
-
+            Covariance matrix for the least squares estimators
+            :math:`\sigma_{\hat{\beta}}^2`
         """
         b, c = linreg(design_matrix,
                       self.flux[~self.mask],
@@ -204,17 +238,29 @@ class CheopsLightCurve(object):
         Parameters
         ----------
         r : `~linea.RegressionResult`
+            Result of the linear regression
         params : `~batman.TransitParams`
+            Transiting exoplanet parameters
         t_fine : `~numpy.ndarray`
+            Times computed on a grid finer than the original observations
         transit_fine : `~numpy.ndarray`
+            Transit model computed at times ``t_fine``
         sinusoid_fine : `~numpy.ndarray`
-        t0_offset : float
-        n_regressors : int
-        bins : int
+            Sinusoidal phase curve model computed at times ``t_fine``
+        t0_offset : float, optional
+            Time offset between the mid-transit time defined by ``params`` and
+            the true mid-transit time [days]. Default is zero.
+        n_regressors : int, optional
+            Number of regressors used to parameterize the phase curve.
+            Default is two.
+        bins : int, optional
+            Number of bins to break the light curve into when plotting (black),
+            default is 15.
 
         Returns
         -------
-        fig, ax : `~matplotlib.pyplot.Figure`, `~matplotlib.pyplot.Axes`
+        fig, ax : `~matplotlib.figure.Figure`, `~matplotlib.axes.Axes`
+            Figure and axis objects containing the phase curve plot.
         """
         transit = r.X[:, 0]
         sinusoid = (r.X[:, 1:n_regressors+1] @ r.betas[1:n_regressors+1] /

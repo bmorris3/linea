@@ -8,15 +8,19 @@ def linreg(X, flux, error):
     Parameters
     ----------
     X : `~numpy.ndarray`
+        Design matrix (concatenated column vectors)
     flux : `~numpy.ndarray`
+        Flux measurements (row vector)
     errors : `~numpy.ndarray`
+        Uncertainties on each flux measurement
 
     Returns
     -------
     betas : `~numpy.ndarray`
-
+        Least squares estimators :math:`\hat{\beta}`
     cov : `~numpy.ndarray`
-
+        Covariance matrix for the least squares estimators
+        :math:`\sigma_{\hat{\beta}}^2`
     """
     inv_N = np.linalg.inv(np.diag(error)**2)
     XT_invN_X = np.linalg.inv(X.T @ inv_N @ X)

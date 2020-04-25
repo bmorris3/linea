@@ -5,7 +5,10 @@ __all__ = ['Planet', 'params_55Cnce']
 
 class Planet(object):
     """
-    Transiting planet parameters
+    Transiting planet parameters.
+
+    This is meant to be a duck-type drop-in for the ``batman`` package's
+    transiting exoplanet parameters ``TransitParams`` object.
     """
     def __init__(self, per=None, t0=None, inc=None, rp=None, ecc=None, w=None,
                  a=None, u=None, fp=None, t_secondary=None,
