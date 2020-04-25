@@ -1,8 +1,8 @@
 linea
 -----
 
-.. image:: https://travis-ci.com/bmorris3/linea.svg?token=tGqUSajNhVAPSfPqaERE&branch=master
-    :target: https://travis-ci.com/bmorris3/linea
+.. image:: https://travis-ci.org/bmorris3/linea.svg?branch=master
+    :target: https://travis-ci.org/bmorris3/linea
     :alt: Testing status
 
 .. image:: https://readthedocs.org/projects/linea/badge/?version=latest
