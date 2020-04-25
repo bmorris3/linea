@@ -2,7 +2,7 @@ import numpy as np
 
 
 def linreg(X, flux, error):
-    """
+    r"""
     Ordinary least squares linear regression.
 
     Parameters

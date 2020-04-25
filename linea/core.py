@@ -88,6 +88,7 @@ class CheopsLightCurve(object):
             Matplotlib axis instance on which to build the plot
         kwargs: dict
             Further keyword arguments to pass to `~matplotlib.pyplot.plot`.
+
         Returns
         -------
         ax : `~matplotlib.axes.Axes`
@@ -110,6 +111,7 @@ class CheopsLightCurve(object):
          norm : bool
             Normalize the column vectors within the design matrix such that they
             have mean=zero and range=unity.
+
         Returns
         -------
         X : `~numpy.ndarray`
@@ -208,7 +210,7 @@ class CheopsLightCurve(object):
             plt.ylabel('Flux')
 
     def regress(self, design_matrix):
-        """
+        r"""
         Regress the design matrix against the fluxes.
 
         Parameters
