@@ -12,8 +12,8 @@ Linear detrending
 
 The default raw aperture photometry from CHEOPS, :math:`f_i`, contains several
 systematic trends as a function of time :math:`t`, roll angle :math:`\theta`,
-stellar centroid position (:math:`x, y`), contamination :math:`c`$`
-(primarily from 53 Cnc), and varying background flux :math:`d`. To first order,
+stellar centroid position (:math:`x, y`), contamination :math:`c`$`, and
+varying background flux :math:`d`. To first order,
 the flux that we observe is a linear combination of the astrophysical signals we
 wish to detect and some unknown function of these observational
 `basis vectors <https://en.wikipedia.org/wiki/Basis_(linear_algebra)>`_.
@@ -43,11 +43,11 @@ mentioned earlier, of the form
         t_1 & x_1 & y_1 & x_1y_1 & x_1^2 & y_1^2 & \theta_1 & c_1 & d_1 & 1 \\
         t_2 & x_2 & y_2 & x_2y_2 & x_2^2 & y_2^2 & \theta_2 & c_2 & d_2 & 1\\
         \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
-        t_N & x_N & y_N & x_Ny_N & x_N^2 & y_N^2 & \theta_N & c_N & d_N & 1
+        t_M & x_M & y_M & x_My_M & x_M^2 & y_M^2 & \theta_M & c_M & d_M & 1
       \end{bmatrix}
     \end{split}
 
-for all :math:`N` observations, after :math:`3\sigma`-clipping the raw fluxes.
+for all :math:`M` observations, after :math:`3\sigma`-clipping the raw fluxes.
 We call the matrix :math:`\bf X_{\rm sys}` the *systematics matrix*, which we
 assemble from the FITS record array associated with each CHEOPS observation.
 
@@ -62,9 +62,9 @@ concatenate with :math:`\bf X_{\rm sys}`, which we call
     \bf X_{\rm model} =
       \begin{bmatrix}
         T_1 & \sin(2\pi t_1 / P) & \cos(2\pi t_1 / P) \\
-        T_2 &\sin(2\pi t_2 / P) & \cos(2\pi t_2 / P)\\
-        \vdots & \vdots & \vdots\\
-        T_N & \sin(2\pi t_N / P) & \cos(2\pi t_N / P)
+        T_2 & \sin(2\pi t_2 / P) & \cos(2\pi t_2 / P) \\
+        \vdots & \vdots & \vdots \\
+        T_M & \sin(2\pi t_M / P) & \cos(2\pi t_M / P)
       \end{bmatrix}
 
 where :math:`T_i` is the Mandel & Agol (2002) transit model minus one. We solve
@@ -83,9 +83,9 @@ We also define the uncertainty matrix :math:`\bf N`,
 
 .. math::
 
-    {\bf N} = {\bf I_N} \sigma_f^2,
+    {\bf N} = {\bf I_M} \sigma_f^2,
 
-where :math:`\bf I_N` is the
+where :math:`\bf I_M` is the
 `identity matrix <https://en.wikipedia.org/wiki/Identity_matrix>`_.
 
 Now we solve for the least-squares estimators :math:`\hat{\beta}`,
