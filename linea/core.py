@@ -335,7 +335,12 @@ class JointLightCurve(CheopsLightCurve):
     Joint analysis object for multiple CHEOPS light curves.
     """
     def __init__(self, light_curves):
-
+        """
+        Parameters
+        ----------
+        light_curves : list
+            List of ``~linea.CheopsLightCurve`` objects.
+        """
         self.light_curves = light_curves
         self.recs = [lc.recs for lc in light_curves]
 
@@ -345,7 +350,10 @@ class JointLightCurve(CheopsLightCurve):
         for attr in self.attrs:
             setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
 
-    def concat(self):
+    def concatenate(self):
+        """
+        Concatenate light curves into a single ``ConcatenatedLightCurve``.
+        """
         extra_attrs = ['time', 'mask']
         c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)
         for attr in self.attrs + extra_attrs:
@@ -353,15 +361,23 @@ class JointLightCurve(CheopsLightCurve):
                                              for lc in self]))
         return c
 
-    def pad_shapes(self):
+    def _pad_shapes(self):
         shapes = []
         for lc in self:
             shapes.append(np.count_nonzero(~lc.mask))
         return shapes
 
     def combined_design_matrix(self, Xs):
+        """
+        Generate the combined design matrix, from a list of design matrices, one
+        per visit.
 
-        shapes = self.pad_shapes()
+        Returns
+        -------
+        X : `~numpy.ndarray`
+            Design matrix (concatenated column vectors of observables)
+        """
+        shapes = self._pad_shapes()
         ndim = Xs[0].shape[1]
         Xs_padded = []
 
@@ -382,6 +398,10 @@ class JointLightCurve(CheopsLightCurve):
         return np.hstack(Xs_padded)
 
     def __iter__(self):
+        """
+        When iterating over ``JointLightCurve`` objects, iterate over items in
+        the ``self.light_curves`` list used to initialize the object.
+        """
         yield from self.light_curves
 
     def regress(self, design_matrix):
