@@ -64,13 +64,11 @@ def params_WASP189():
     params_w189.rp = 0.00372**0.5
 
     # a/rs = b/cosi
-    b = 0.51
+    # b = 0.51
 
-    eccentricity = 0 # np.sqrt(ecosw**2 + esinw**2)
-    omega = 90 # np.degrees(np.arctan2(esinw, ecosw))
+    eccentricity = 0
+    omega = 90
 
-    ecc_factor = (np.sqrt(1 - eccentricity**2) /
-                  (1 + eccentricity * np.sin(np.radians(omega))))
     params_w189.t_secondary = 0.5
     params_w189.fp = 1e-6
 
