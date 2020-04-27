@@ -1,4 +1,5 @@
 import os
+from collections import namedtuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +11,7 @@ from astropy.stats import SigmaClip, mad_std
 
 from .linalg import linreg, RegressionResult
 
-__all__ = ['CheopsLightCurve']
+__all__ = ['CheopsLightCurve', 'JointLightCurve']
 
 
 def normalize(vector):
@@ -310,3 +311,100 @@ class CheopsLightCurve(object):
         ax[0].ticklabel_format(useOffset=False)
 
         return fig, ax
+
+    def phase(self, planet_params):
+        """
+        Orbital phase of planet at times ``lc.bjd_time``.
+
+        Parameters
+        ----------
+        planet_params : `~linea.Planet`
+            Planet parameter object.
+
+        Returns
+        -------
+        phases : `~numpy.ndarray`
+            Orbital phases at times ``lc.bjd_time``
+        """
+        return (((self.bjd_time - planet_params.t0) % planet_params.per) /
+                planet_params.per)
+
+
+class JointLightCurve(CheopsLightCurve):
+    """
+    Joint analysis object for multiple CHEOPS light curves.
+    """
+    def __init__(self, light_curves):
+
+        self.light_curves = light_curves
+        self.recs = [lc.recs for lc in light_curves]
+
+        self.attrs = [attr.lower() for attr in
+                      light_curves[0].recs.columns.names]
+
+        for attr in self.attrs:
+            setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
+
+    def concat(self):
+        extra_attrs = ['time', 'mask']
+        c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)
+        for attr in self.attrs + extra_attrs:
+            setattr(c, attr, np.concatenate([getattr(lc, attr)
+                                             for lc in self]))
+        return c
+
+    def pad_shapes(self):
+        shapes = []
+        for lc in self:
+            shapes.append(np.count_nonzero(~lc.mask))
+        return shapes
+
+    def combined_design_matrix(self, Xs):
+
+        shapes = self.pad_shapes()
+        ndim = Xs[0].shape[1]
+        Xs_padded = []
+
+        for i in range(len(Xs)):
+            before = shapes[:i]
+            after = shapes[i+1:]
+
+            prepad = np.zeros((sum(before), ndim)) if len(before) > 0 else None
+            postpad = np.zeros((sum(after), ndim)) if len(after) > 0 else None
+
+            segments = []
+            for j in [prepad, Xs[i], postpad]:
+                if j is not None:
+                    segments.append(j)
+
+            Xs_padded.append(np.vstack(segments))
+
+        return np.hstack(Xs_padded)
+
+    def __iter__(self):
+        yield from self.light_curves
+
+    def regress(self, design_matrix):
+        r"""
+        Regress the design matrix against the fluxes.
+
+        Parameters
+        ----------
+        design_matrix : `~numpy.ndarray`
+            Design matrix (concatenated column vectors of observables)
+
+        Returns
+        -------
+        betas : `~numpy.ndarray`
+            Least squares estimators :math:`\hat{\beta}`
+        cov : `~numpy.ndarray`
+            Covariance matrix for the least squares estimators
+            :math:`\sigma_{\hat{\beta}}^2`
+        """
+        mask = np.concatenate([lc.mask for lc in self])
+
+        b, c = linreg(design_matrix,
+                      np.concatenate(self.flux)[~mask],
+                      np.concatenate(self.fluxerr)[~mask])
+
+        return RegressionResult(design_matrix, b, c)
