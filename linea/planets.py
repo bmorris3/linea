@@ -34,7 +34,7 @@ class Planet(object):
         Initialize a Planet instance from the target name.
 
         There's a small (but growing?) database of planets pre-defined in the
-        ``linea/data/planets.json`` file. If you're favorite planet is missing,
+        ``linea/data/planets.json`` file. If your favorite planet is missing,
         pull requests are welcome!
 
         Parameters
