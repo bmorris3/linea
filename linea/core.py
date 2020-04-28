@@ -1,5 +1,6 @@
 import os
 from collections import namedtuple
+from glob import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -350,6 +351,14 @@ class JointLightCurve(CheopsLightCurve):
         for attr in self.attrs:
             setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
 
+    @classmethod
+    def from_example(cls, norm=True):
+        path = os.path.join(os.path.dirname(__file__), 'data',
+                            'example_wasp189_*.fits')
+        wasp189_light_curves = [CheopsLightCurve.from_fits(p)
+                                for p in glob(path)]
+        return cls(wasp189_light_curves)
+
     def concatenate(self):
         """
         Concatenate light curves into a single ``ConcatenatedLightCurve``.
@@ -374,7 +383,7 @@ class JointLightCurve(CheopsLightCurve):
 
         Parameters
         ----------
-        design_matrices : list of `~numpy.ndarray`s
+        design_matrices : list of `~numpy.ndarray`
             List of design matrices, one per visit.
 
         Returns

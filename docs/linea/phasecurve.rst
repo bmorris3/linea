@@ -1,9 +1,14 @@
-***************
-Getting Started
-***************
+***********************
+Phase Curve of 55 Cnc e
+***********************
 
 Introduction
 ------------
+
+.. warning::
+
+    This tutorial does **not** use real CHEOPS data, only a realistic example
+    data set. Don't interpret any science results from this example!
 
 55 Cnc e is perhaps the rocky planet most amenable
 to characterization with CHEOPS. This super-Earth with radius 1.91
@@ -36,14 +41,9 @@ under high irradiation.
 
 CHEOPS observed 55 Cnc on May 23, 2020 UTC for 26 hours. This was the first of
 many visits planned on 55 Cnc. In this tutorial, we'll demonstrate how to reduce
-the first CHEOPS observations of 55 Cnc e in order to recover the phase curve
-signal from the exoplanet.
-
-.. warning::
-
-    This tutorial does not use real CHEOPS data, only a realistic example data
-    set. Don't interpret any science results from this example!
-
+a convincing **simulated example dataset** similar to the first CHEOPS
+observations of 55 Cnc e in order to recover the phase curve signal from the
+exoplanet.
 
 Sigma clipping
 --------------
@@ -57,19 +57,23 @@ First, let's import some packages we'll need, including ``linea``:
     from scipy.optimize import fmin_l_bfgs_b
     from batman import TransitModel
 
-    from linea import CheopsLightCurve, params_55Cnce
+    from linea import CheopsLightCurve, Planet
 
     # Load the transit parameters for 55 Cnc e
-    p = params_55Cnce()
+    p = Planet.from_name('55 Cnc e')
 
     # Load the example light curve of 55 Cnc e (built into the package)
     lc = CheopsLightCurve.from_example()
 
-Then we sigma-clip the light curve -- this removes contamination from 53 Cnc.
+In the last line, we initialized a `~linea.CheopsLightCurve` object using the
+`~linea.CheopsLightCurve.from_example` method, which loads example (fake) data
+of 55 Cnc e.
+
+Then we sigma-clip the light curve -- this removes outliers.
 
 .. code-block:: python
 
-    # Sigma clip the light curve to remove contamination from 53 Cnc
+    # Sigma clip the light curve to remove outliers
     lc.sigma_clip_flux(sigma_upper=3, sigma_lower=3, plot=True)
 
 .. plot::
@@ -79,9 +83,9 @@ Then we sigma-clip the light curve -- this removes contamination from 53 Cnc.
     from scipy.optimize import fmin_l_bfgs_b
     from batman import TransitModel
 
-    from linea import CheopsLightCurve, params_55Cnce
+    from linea import CheopsLightCurve, Planet
 
-    p = params_55Cnce()
+    p = Planet.from_name('55 Cnc e')
 
     lc = CheopsLightCurve.from_example()
 
@@ -211,9 +215,9 @@ the phase curve, with the best transit and sinusoidal models:
     from scipy.optimize import fmin_l_bfgs_b
     from batman import TransitModel
 
-    from linea import CheopsLightCurve, params_55Cnce
+    from linea import CheopsLightCurve, Planet
 
-    p = params_55Cnce()
+    p = Planet.from_name('55 Cnc e')
 
     lc = CheopsLightCurve.from_example()
 
@@ -283,6 +287,13 @@ the phase curve, with the best transit and sinusoidal models:
     fig, ax = lc.plot_phase_curve(r, p, t_fine, transit_fine, sinusoid_fine)
     fig.tight_layout()
     plt.show()
+
+.. note::
+
+    The above plot is a simulated example light curve, **not** real
+    CHEOPS observations. Do not make any conclusions about the planet from
+    this fake dataset.
+
 
 The transit (when the planet occults the host star) occurs near phase zero. The
 planet's orbital phase is normalized such that an entire orbit spans the range
