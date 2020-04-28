@@ -87,7 +87,7 @@ class CheopsLightCurve(object):
         ----------
         ax : `~matplotlib.axes.Axes`
             Matplotlib axis instance on which to build the plot
-        kwargs: dict
+        kwargs : dict
             Further keyword arguments to pass to `~matplotlib.pyplot.plot`.
 
         Returns
@@ -242,7 +242,7 @@ class CheopsLightCurve(object):
         ----------
         r : `~linea.RegressionResult`
             Result of the linear regression
-        params : `~batman.TransitParams`
+        params : `~linea.Planet`
             Transiting exoplanet parameters
         t_fine : `~numpy.ndarray`
             Times computed on a grid finer than the original observations
@@ -367,10 +367,15 @@ class JointLightCurve(CheopsLightCurve):
             shapes.append(np.count_nonzero(~lc.mask))
         return shapes
 
-    def combined_design_matrix(self, Xs):
+    def combined_design_matrix(self, design_matrices):
         """
         Generate the combined design matrix, from a list of design matrices, one
         per visit.
+
+        Parameters
+        ----------
+        design_matrices : list of `~numpy.ndarray`s
+            List of design matrices, one per visit.
 
         Returns
         -------
@@ -378,10 +383,10 @@ class JointLightCurve(CheopsLightCurve):
             Design matrix (concatenated column vectors of observables)
         """
         shapes = self._pad_shapes()
-        ndim = Xs[0].shape[1]
+        ndim = design_matrices[0].shape[1]
         Xs_padded = []
 
-        for i in range(len(Xs)):
+        for i in range(len(design_matrices)):
             before = shapes[:i]
             after = shapes[i+1:]
 
@@ -389,7 +394,7 @@ class JointLightCurve(CheopsLightCurve):
             postpad = np.zeros((sum(after), ndim)) if len(after) > 0 else None
 
             segments = []
-            for j in [prepad, Xs[i], postpad]:
+            for j in [prepad, design_matrices[i], postpad]:
                 if j is not None:
                     segments.append(j)
 

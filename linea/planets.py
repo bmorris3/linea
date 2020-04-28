@@ -1,6 +1,9 @@
-import numpy as np
+import os
+from json import load
 
-__all__ = ['Planet', 'params_55Cnce', 'params_WASP189']
+__all__ = ['Planet']
+
+json_path = os.path.join(os.path.dirname(__file__), 'data', 'planets.json')
 
 
 class Planet(object):
@@ -25,56 +28,20 @@ class Planet(object):
         self.fp = fp
         self.t_secondary = t_secondary
 
+    @classmethod
+    def from_name(cls, name):
+        """
+        Initialize a Planet instance from the target name.
 
-def params_55Cnce():
-    """
-    Planet parameters for 55 Cnc e
-    """
-    params_e = Planet()
-    params_e.per = 0.736539
-    params_e.t0 = 2455733.013
-    params_e.inc = 83.3
-    params_e.rp = 0.0187
+        There's a small (but growing?) database of planets pre-defined in the
+        ``linea/data/planets.json`` file. If you're favorite planet is missing,
+        pull requests are welcome!
 
-    # a/rs = b/cosi
-    b = 0.41
+        Parameters
+        ----------
+        name : str (i.e.: "55 Cnc e" or "WASP-189")
+             Name of the planet
+        """
+        planets = load(open(json_path, 'r'))
 
-    eccentricity = 0  # np.sqrt(ecosw**2 + esinw**2)
-    omega = 90  # np.degrees(np.arctan2(esinw, ecosw))
-
-    ecc_factor = (np.sqrt(1 - eccentricity**2) /
-                  (1 + eccentricity * np.sin(np.radians(omega))))
-
-    params_e.a = b / np.cos(np.radians(params_e.inc)) / ecc_factor
-    params_e.ecc = eccentricity
-    params_e.w = omega
-    params_e.u = [0.4, 0.2]
-    params_e.limb_dark = 'quadratic'
-    return params_e
-
-
-def params_WASP189():
-    """
-    Planet parameters for WASP-189 b
-    """
-    params_w189 = Planet()
-    params_w189.per = 2.7240338
-    params_w189.t0 = 2456706.4558
-    params_w189.inc = 83.4
-    params_w189.rp = 0.00372**0.5
-
-    # a/rs = b/cosi
-    # b = 0.51
-
-    eccentricity = 0
-    omega = 90
-
-    params_w189.t_secondary = 0.5
-    params_w189.fp = 1e-6
-
-    params_w189.a = 4.4
-    params_w189.ecc = eccentricity
-    params_w189.w = omega
-    params_w189.u = [0, 0]
-    params_w189.limb_dark = 'quadratic'
-    return params_w189
+        return cls(**planets[name])
