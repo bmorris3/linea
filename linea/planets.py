@@ -39,7 +39,7 @@ class Planet(object):
 
         Parameters
         ----------
-        name : str (i.e.: "55 Cnc e" or "WASP-189")
+        name : str (i.e.: "55 Cnc e" or "WASP-189 b")
              Name of the planet
         """
         planets = load(open(json_path, 'r'))
