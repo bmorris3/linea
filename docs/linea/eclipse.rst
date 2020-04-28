@@ -121,7 +121,7 @@ and uncertainty are:
 
 .. code-block:: python
 
-    >>> print(f"Eclipse depth = {r.betas[-1] :.0f} ± {np.sqrt(np.diag(r.cov))[-1] :.0f} ppm")
+    >>> print(f"Eclipse depth = {r.betas[-1] :.0f} ± {np.sqrt(np.diag(r.cov))[-1] :.0f} ppm")  # doctest: +SKIP
     Eclipse depth = 77 ± 7 ppm
 
 Finally, let's plot the best-fit detrended light curve and eclipse model:
