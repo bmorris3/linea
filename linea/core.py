@@ -332,7 +332,7 @@ class CheopsLightCurve(object):
                 planet_params.per)
 
 
-class JointLightCurve(CheopsLightCurve):
+class JointLightCurve(object):
     """
     Joint analysis object for multiple CHEOPS light curves.
     """
@@ -344,7 +344,6 @@ class JointLightCurve(CheopsLightCurve):
             List of `~linea.CheopsLightCurve` objects.
         """
         self.light_curves = light_curves
-        self.recs = [lc.recs for lc in light_curves]
 
         self.attrs = [attr.lower() for attr in
                       light_curves[0].recs.dtype.fields]
@@ -434,6 +433,12 @@ class JointLightCurve(CheopsLightCurve):
         """
         yield from self.light_curves
 
+    def __len__(self):
+        return len(self.light_curves)
+
+    def __getitem__(self, item):
+        return self.light_curves[item]
+
     def regress(self, design_matrix):
         r"""
         Regress the design matrix against the fluxes.
@@ -458,3 +463,28 @@ class JointLightCurve(CheopsLightCurve):
                       np.concatenate(self.fluxerr)[~mask])
 
         return RegressionResult(design_matrix, b, c)
+
+    def plot(self, ax=None, **kwargs):
+        """
+        Plot the light curve.
+
+        Parameters
+        ----------
+        ax : `~matplotlib.axes.Axes`
+            Matplotlib axis instance on which to build the plot
+        kwargs : dict
+            Further keyword arguments to pass to `~matplotlib.pyplot.plot`.
+
+        Returns
+        -------
+        ax : `~matplotlib.axes.Axes`
+            Matplotlib axis instance with the light curve plotted on it.
+        """
+        if ax is None:
+            ax = plt.gca()
+
+        for lc in self:
+            ax.errorbar(lc.bjd_time[~lc.mask], lc.flux[~lc.mask],
+                        lc.fluxerr[~lc.mask], **kwargs)
+
+        return ax
