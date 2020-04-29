@@ -42,6 +42,7 @@ class Planet(object):
         name : str (i.e.: "55 Cnc e" or "WASP-189 b")
              Name of the planet
         """
-        planets = load(open(json_path, 'r'))
+        with open(json_path, 'r') as f:
+            planets = load(f)
 
         return cls(**planets[name])

@@ -40,7 +40,7 @@ class CheopsLightCurve(object):
         """
         self.recs = record_array
 
-        for key in self.recs.columns.names:
+        for key in list(self.recs.dtype.fields):
             setattr(self, key.lower(), self.recs[key])
 
         self.time = Time(self.bjd_time, format='jd')
@@ -362,6 +362,12 @@ class JointLightCurve(CheopsLightCurve):
     def concatenate(self):
         """
         Concatenate light curves into a single ``ConcatenatedLightCurve``.
+
+        Returns
+        -------
+        c : `~collections.namedtuple`
+            Named tuple containing the concatenated contents of the
+            JointLightCurve object.
         """
         extra_attrs = ['time', 'mask']
         c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)

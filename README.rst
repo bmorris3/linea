@@ -13,7 +13,8 @@ linea
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
-Linear light curve detrending for `CHEOPS <https://cheops.unibe.ch>`_.
+Linear light curve detrending for `CHEOPS <https://cheops.unibe.ch>`_. For more
+information and tutorials: `read the docs <https://linea.readthedocs.io/>`_.
 
 License
 -------

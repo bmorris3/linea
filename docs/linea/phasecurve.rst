@@ -196,10 +196,10 @@ transit model and sinusoidal trend which span the full time interval:
                                 exp_time=lc.bjd_time[1] - lc.bjd_time[0],
                                 ).light_curve(p)
 
-    sinusoid_fine = (np.hstack([
+    sinusoid_fine = np.hstack([
         np.sin(2 * np.pi * delta_t_fine / p.per)[:, None],
         np.cos(2 * np.pi * delta_t_fine / p.per)[:, None],
-    ]) @ r.betas[1:3]) / np.median(r.best_fit)
+    ]) @ r.betas[1:3]
 
 Finally let's call the `~linea.CheopsLightCurve.plot_phase_curve` method to plot
 the phase curve, with the best transit and sinusoidal models:
@@ -279,10 +279,10 @@ the phase curve, with the best transit and sinusoidal models:
                                 exp_time=lc.bjd_time[1] - lc.bjd_time[0],
                                 ).light_curve(p)
 
-    sinusoid_fine = (np.hstack([
+    sinusoid_fine = np.hstack([
         np.sin(2 * np.pi * (t_fine - t_fine.mean()) / p.per)[:, None],
         np.cos(2 * np.pi * (t_fine - t_fine.mean()) / p.per)[:, None],
-    ]) @ r.betas[1:3]) / np.median(r.best_fit)
+    ]) @ r.betas[1:3]
 
     fig, ax = lc.plot_phase_curve(r, p, t_fine, transit_fine, sinusoid_fine)
     fig.tight_layout()
