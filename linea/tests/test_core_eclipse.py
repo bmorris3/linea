@@ -133,8 +133,6 @@ def test_eclipse(eclipse_depth):
                                  exp_time=lc.bjd_time[1] - lc.bjd_time[0],
                                  ).light_curve(p) - 1
 
-    t = lc.bjd_time[~lc.mask, None] - lc.bjd_time.mean()
-
     # Build a design matrix
     X = np.hstack([
         # Default design matrix:
