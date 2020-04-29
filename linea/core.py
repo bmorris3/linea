@@ -391,21 +391,27 @@ class JointLightCurve(object):
             shapes.append(np.count_nonzero(~lc.mask))
         return shapes
 
-    def combined_design_matrix(self, design_matrices):
+    def combined_design_matrix(self, design_matrices=None):
         """
         Generate the combined design matrix, from a list of design matrices, one
         per visit.
 
         Parameters
         ----------
-        design_matrices : list of `~numpy.ndarray`
-            List of design matrices, one per visit.
+        design_matrices : list of `~numpy.ndarray` (optional)
+            List of design matrices, one per visit. If None is supplied, fetch
+            the design matrices from each of the `~linea.CheopsLightCurve`
+            objects used to initialize the `~linea.JointLightCurve`.
 
         Returns
         -------
         X : `~numpy.ndarray`
             Design matrix (concatenated column vectors of observables)
         """
+
+        if design_matrices is None:
+            design_matrices = [lc.design_matrix() for lc in self]
+
         shapes = self._pad_shapes()
         ndim = design_matrices[0].shape[1]
         Xs_padded = []

@@ -127,21 +127,25 @@ def test_eclipse(eclipse_depth):
     # Check that some points get masked by the flux sigma clipping
     assert all([np.count_nonzero(lc.mask) > 0 for lc in lcs])
 
-    eclipse_model = TransitModel(p, lc.bjd_time[~lc.mask],
+    all_lcs = lcs.concatenate()
+    eclipse_model = TransitModel(p, all_lcs.bjd_time[~all_lcs.mask],
                                  supersample_factor=3,
                                  transittype='secondary',
-                                 exp_time=lc.bjd_time[1] - lc.bjd_time[0],
+                                 exp_time=lcs[0].bjd_time[1]-lcs[0].bjd_time[0],
                                  ).light_curve(p) - 1
+
+    X_combined = lcs.combined_design_matrix()
 
     # Build a design matrix
     X = np.hstack([
-        # Default design matrix:
-        lc.design_matrix(),
+        # Default combined design matrix:
+        X_combined,
 
+        # Eclipse model
         eclipse_model[:, None]
     ])
 
-    r = lc.regress(X)
+    r = lcs.regress(X)
 
     obs_eclipse_depth = r.betas[-1]
     eclipse_error_ppm = np.sqrt(np.diag(r.cov))[-1]
@@ -150,4 +154,4 @@ def test_eclipse(eclipse_depth):
     agreement_sigma = (abs(obs_eclipse_depth - eclipse_depth) /
                        eclipse_error_ppm)
 
-    assert agreement_sigma < 1
+    assert agreement_sigma < 2
