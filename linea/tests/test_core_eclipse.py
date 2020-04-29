@@ -52,7 +52,6 @@ def generate_recarrays_WASP189(depth_ppm=80, seed=42, n_outliers=50,
         centroid_x = location_x[0] + 0.2 * np.random.randn(n_points)
         centroid_y = location_y[0] + 0.2 * np.random.randn(n_points)
 
-        p.t_secondary = 0.5
         p.fp = depth_ppm * 1e-6
         model = TransitModel(p, bjd_time,
                              supersample_factor=3,
