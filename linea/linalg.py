@@ -3,7 +3,28 @@ import numpy as np
 
 def linreg(X, flux, error):
     r"""
-    Ordinary least squares linear regression.
+    Least squares linear regression.
+
+    We solve for the least-squares estimators :math:`\hat{\beta}`,
+
+    .. math::
+
+        \hat{\beta} = ({\bf X}^{\rm T} {\bf N}^{-1} {\bf X})^{-1} {\bf X}^{\rm T} {\bf N}^{-1} f.
+
+    Uncertainties on each of the least-squares estimators are computed with the
+    pre-computed matrix inversion,
+
+    .. math::
+
+        \sigma_{\hat{\beta}}^2 = ({\bf X}^{\rm T} {\bf N}^{-1} {\bf X})^{-1}.
+
+    We've defined the uncertainty matrix :math:`\bf N`,
+
+    .. math::
+
+        {\bf N} = {\bf I_M} \sigma_f^2,
+
+    where :math:`\bf I_M` is the identity matrix.
 
     Parameters
     ----------
@@ -11,8 +32,8 @@ def linreg(X, flux, error):
         Design matrix (concatenated column vectors)
     flux : `~numpy.ndarray`
         Flux measurements (row vector)
-    errors : `~numpy.ndarray`
-        Uncertainties on each flux measurement
+    error : `~numpy.ndarray`
+        Uncertainties on each flux measurement (row vector)
 
     Returns
     -------

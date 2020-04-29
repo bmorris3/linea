@@ -111,7 +111,7 @@ def generate_recarray_WASP189(depth_ppm=80, seed=42, n_outliers=50,
 @pytest.mark.parametrize('eclipse_depth,', [20, 40, 60, 80, 100])
 def test_eclipse(eclipse_depth):
     """
-    from linea.tests.test_core import test_phase_curve as f; f()
+    from linea.tests.test_core import test_eclipse as f; f()
     """
     p = Planet.from_name("WASP-189 b")
 

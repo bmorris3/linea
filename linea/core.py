@@ -77,7 +77,8 @@ class CheopsLightCurve(object):
             Normalize the fluxes such that the median flux is unity. Default is
             True.
         """
-        path = os.path.join(os.path.dirname(__file__), 'data', 'example.fits')
+        path = os.path.join(os.path.dirname(__file__), 'data',
+                            'example_55Cnce.fits')
         return cls.from_fits(path, norm=norm)
 
     def plot(self, ax=None, **kwargs):
@@ -355,7 +356,7 @@ class JointLightCurve(CheopsLightCurve):
     def from_example(cls, norm=True):
         path = os.path.join(os.path.dirname(__file__), 'data',
                             'example_wasp189_*.fits')
-        wasp189_light_curves = [CheopsLightCurve.from_fits(p)
+        wasp189_light_curves = [CheopsLightCurve.from_fits(p, norm=norm)
                                 for p in glob(path)]
         return cls(wasp189_light_curves)
 
