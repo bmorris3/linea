@@ -346,7 +346,7 @@ class JointLightCurve(CheopsLightCurve):
         self.recs = [lc.recs for lc in light_curves]
 
         self.attrs = [attr.lower() for attr in
-                      light_curves[0].recs.columns.names]
+                      light_curves[0].recs.dtype.fields]
 
         for attr in self.attrs:
             setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
