@@ -14,9 +14,9 @@ from .test_core_phase_curve import simulate_roll_angle
 true_basis_vector_weights = [-2, 2, 1, 1, 20, 1, 1.5, 0.1, 0.1, 2e3]
 
 
-def generate_recarray_WASP189(depth_ppm=80, seed=42, n_outliers=50,
-                              cheops_orbit_min=99.5, obs_efficiency=0.55,
-                              n_visits=4):
+def generate_recarrays_WASP189(depth_ppm=80, seed=42, n_outliers=50,
+                               cheops_orbit_min=99.5, obs_efficiency=0.55,
+                               n_visits=4):
     p = Planet.from_name("WASP-189 b")
 
     np.random.seed(seed)
@@ -115,7 +115,7 @@ def test_eclipse(eclipse_depth):
     """
     p = Planet.from_name("WASP-189 b")
 
-    ras = generate_recarray_WASP189(depth_ppm=eclipse_depth)
+    ras = generate_recarrays_WASP189(depth_ppm=eclipse_depth)
     lcs = JointLightCurve([CheopsLightCurve(ra) for ra in ras])
 
     # check that normalization brings flux continuum to unity:
@@ -150,4 +150,4 @@ def test_eclipse(eclipse_depth):
     agreement_sigma = (abs(obs_eclipse_depth - eclipse_depth) /
                        eclipse_error_ppm)
 
-    assert agreement_sigma < 2
+    assert agreement_sigma < 1
