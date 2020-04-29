@@ -341,7 +341,7 @@ class JointLightCurve(CheopsLightCurve):
         Parameters
         ----------
         light_curves : list
-            List of ``~linea.CheopsLightCurve`` objects.
+            List of `~linea.CheopsLightCurve` objects.
         """
         self.light_curves = light_curves
         self.recs = [lc.recs for lc in light_curves]
@@ -354,6 +354,15 @@ class JointLightCurve(CheopsLightCurve):
 
     @classmethod
     def from_example(cls, norm=True):
+        """
+        Load example WASP-189 b light curves (**NOTE**: this is not real data).
+
+        Parameters
+        ----------
+        norm : bool
+            Normalize the fluxes such that the median flux is unity. Default is
+            True.
+        """
         path = os.path.join(os.path.dirname(__file__), 'data',
                             'example_wasp189_*.fits')
         wasp189_light_curves = [CheopsLightCurve.from_fits(p, norm=norm)
