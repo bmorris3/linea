@@ -72,20 +72,10 @@ Then we sigma-clip the light curve -- this removes outliers.
 Regression analysis
 -------------------
 
-Next we construct a design matrix, composed of the concatenation of the design
-matrices generated from observables for each individual visit:
-
-.. code-block:: python
-
-    Xs = [lc.design_matrix() for lc in lcs]
-    X = lcs.combined_design_matrix(Xs)
-
-We compute each visit's design matrix individually, then call
-`~linea.JointLightCurve.combined_design_matrix` to combine them into one big
-design matrix.
-
-Now let's concatenate the design matrix of basis vectors with an eclipse model,
-computed by ``batman``:
+We assemble each indidiual visit's design matrix by calling
+`~linea.JointLightCurve.combined_design_matrix`, which combines them into one
+big design matrix. We'll also concatenate the design matrix of basis vectors
+with an eclipse model, computed by ``batman``:
 
 .. code-block:: python
 
@@ -98,7 +88,7 @@ computed by ``batman``:
                                 ).light_curve(p) - 1
 
     X = np.hstack([
-        X,
+        lcs.combined_design_matrix(),
         eclipse_model[:, None]
     ])
 
@@ -176,9 +166,6 @@ Finally, let's plot the best-fit detrended light curve and eclipse model:
     for lc in lcs:
         lc.sigma_clip_flux(sigma_upper=3, sigma_lower=3)
 
-    Xs = [lc.design_matrix() for lc in lcs]
-    X = lcs.combined_design_matrix(Xs)
-
     all_lcs = lcs.concatenate()
 
     eclipse_model = TransitModel(p, all_lcs.bjd_time[~all_lcs.mask],
@@ -188,7 +175,7 @@ Finally, let's plot the best-fit detrended light curve and eclipse model:
                                 ).light_curve(p) - 1
 
     X = np.hstack([
-        X,
+        lcs.combined_design_matrix(),
         eclipse_model[:, None]
     ])
 
