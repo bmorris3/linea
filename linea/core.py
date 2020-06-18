@@ -111,7 +111,7 @@ class CheopsLightCurve(object):
 
         Parameters
         ----------
-         norm : bool
+        norm : bool
             Normalize the column vectors within the design matrix such that they
             have mean=zero and range=unity.
 
@@ -125,7 +125,6 @@ class CheopsLightCurve(object):
                 ((self.bjd_time - self.bjd_time.mean()) /
                  self.bjd_time.ptp()),
                 normalize(self.roll_angle),
-                normalize(self.roll_angle**2),
                 normalize(self.centroid_x - self.centroid_x.mean()),
                 normalize(self.centroid_y - self.centroid_y.mean()),
                 normalize((self.centroid_x - self.centroid_x.mean())**2),
@@ -139,7 +138,6 @@ class CheopsLightCurve(object):
             X = np.vstack([
                 (self.bjd_time - self.bjd_time.mean()),
                 self.roll_angle,
-                self.roll_angle**2,
                 self.centroid_x - self.centroid_x.mean(),
                 self.centroid_y - self.centroid_y.mean(),
                 (self.centroid_x - self.centroid_x.mean())**2,
