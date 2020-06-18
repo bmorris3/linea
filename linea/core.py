@@ -379,7 +379,7 @@ class JointLightCurve(object):
         extra_attrs = ['time', 'mask']
         c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)
         for attr in self.attrs + extra_attrs:
-            if attr is not 'time':
+            if attr != 'time':
                 setattr(c, attr, np.concatenate([getattr(lc, attr)
                                                  for lc in self]))
             else:

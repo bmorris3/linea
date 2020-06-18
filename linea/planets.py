@@ -46,4 +46,3 @@ class Planet(object):
             planets = load(f)
 
         return cls(**planets[name])
-
