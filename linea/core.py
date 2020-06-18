@@ -379,8 +379,13 @@ class JointLightCurve(object):
         extra_attrs = ['time', 'mask']
         c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)
         for attr in self.attrs + extra_attrs:
-            setattr(c, attr, np.concatenate([getattr(lc, attr)
-                                             for lc in self]))
+            if attr is not 'time':
+                setattr(c, attr, np.concatenate([getattr(lc, attr)
+                                                 for lc in self]))
+            else:
+                setattr(c, attr, Time(np.concatenate([getattr(lc, attr).jd
+                                                      for lc in self]),
+                                      format='jd'))
         return c
 
     def _pad_shapes(self):
