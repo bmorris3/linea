@@ -3,7 +3,7 @@ from json import load
 
 __all__ = ['Planet']
 
-json_path = os.path.join(os.path.dirname(__file__), 'data', 'planets.json')
+planets_path = os.path.join(os.path.dirname(__file__), 'data', 'planets.json')
 
 
 class Planet(object):
@@ -42,7 +42,8 @@ class Planet(object):
         name : str (i.e.: "55 Cnc e" or "WASP-189 b")
              Name of the planet
         """
-        with open(json_path, 'r') as f:
+        with open(planets_path, 'r') as f:
             planets = load(f)
 
         return cls(**planets[name])
+
