@@ -44,6 +44,7 @@ class CheopsLightCurve(object):
             setattr(self, key.lower(), self.recs[key])
 
         self.time = Time(self.bjd_time, format='jd')
+        # self.mask = np.zeros(len(self.flux)).astype(bool)
         self.mask = (np.isnan(self.flux) | self.status.astype(bool) |
                      self.event.astype(bool))
 
