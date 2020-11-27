@@ -14,6 +14,26 @@ from .linalg import linreg, RegressionResult
 
 __all__ = ['CheopsLightCurve', 'JointLightCurve']
 
+attrs = [
+    "background",
+    "bjd_time",
+    "centroid_x",
+    "centroid_y",
+    "conta_lc",
+    "conta_lc_err",
+    "dark",
+    "event",
+    "flux",
+    "fluxerr",
+    "location_x",
+    "location_y",
+    "mjd_time",
+    "roll_angle",
+    "smearing_lc",
+    "smearing_lc_err",
+    "status",
+    "utc_time"
+]
 
 def normalize(vector):
     """
@@ -27,33 +47,42 @@ class CheopsLightCurve(object):
     Data handling class for CHEOPS light curves.
     """
 
-    def __init__(self, record_array, norm=True):
+    def __init__(self, record_array={}, extra_basis_vectors=None,
+                 time=None, mask=None, norm=True):
         """
         Parameters
         ----------
         record_array : `~numpy.recarray`
             Record array of column vectors and their labels (names). Often
             this record array comes straight from a FITS file.
+        hk_record_array : `~numpy.recarray`
+            Record array of column vectors and their labels from the housekeeping
+            FITS file which often ends in "SCI_CAL_SubArray_*.fits". Often
+            this record array comes straight from a FITS file.
         norm : bool
             Normalize the fluxes such that the median flux is unity. Default is
             True.
         """
         self.recs = record_array
+        self.extra_basis_vectors = extra_basis_vectors
 
-        for key in list(self.recs.dtype.fields):
-            setattr(self, key.lower(), self.recs[key])
+        for key in attrs:
+            if (hasattr(self.recs, 'columns') and
+                    key in [i.name.lower() for i in self.recs.columns]):
+                setattr(self, key, self.recs[key])
 
-        self.time = Time(self.bjd_time, format='jd')
-        # self.mask = np.zeros(len(self.flux)).astype(bool)
+        self.time = (Time(self.bjd_time, format='jd')
+                     if hasattr(self, 'bjd_time') else time)
+
         self.mask = (np.isnan(self.flux) | self.status.astype(bool) |
-                     self.event.astype(bool))
+                     self.event.astype(bool)) if hasattr(self, 'flux') else mask
 
-        if norm:
+        if hasattr(self, 'flux') and norm:
             self.fluxerr = self.fluxerr / np.nanmedian(self.flux)
             self.flux = self.flux / np.nanmedian(self.flux)
 
     @classmethod
-    def from_fits(cls, path, norm=True):
+    def from_fits(cls, path, extra_basis_vectors=None, norm=True):
         """
         Load a FITS file from DACE or the DRP.
 
@@ -61,11 +90,14 @@ class CheopsLightCurve(object):
         ----------
         path : str
             Path to the FITS file containing the data to load.
+        extra_basis_vectors : `~numpy.ndarray`
+            Extra basis vectors to add to the design matrix.
         norm : bool
             Normalize the fluxes such that the median flux is unity. Default is
             True.
         """
-        return cls(fits.getdata(path), norm=norm)
+        return cls(fits.getdata(path), extra_basis_vectors=extra_basis_vectors,
+                   norm=norm)
 
     @classmethod
     def from_example(cls, norm=True):
@@ -123,29 +155,21 @@ class CheopsLightCurve(object):
         """
         if norm:
             X = np.vstack([
-                ((self.bjd_time - self.bjd_time.mean()) /
-                 self.bjd_time.ptp()),
-                normalize(self.roll_angle),
-                normalize(self.centroid_x - self.centroid_x.mean()),
-                normalize(self.centroid_y - self.centroid_y.mean()),
-                normalize((self.centroid_x - self.centroid_x.mean())**2),
-                normalize((self.centroid_y - self.centroid_y.mean())**2),
-                normalize(self.conta_lc),
-                normalize(self.dark),
+                normalize(np.cos(np.radians(self.roll_angle))),
+                normalize(np.sin(np.radians(self.roll_angle))),
                 np.ones(len(self.bjd_time)),
             ]).T
 
         else:
             X = np.vstack([
-                (self.bjd_time - self.bjd_time.mean()),
-                self.roll_angle,
-                self.centroid_x - self.centroid_x.mean(),
-                self.centroid_y - self.centroid_y.mean(),
-                (self.centroid_x - self.centroid_x.mean())**2,
-                (self.centroid_y - self.centroid_y.mean())**2,
-                self.conta_lc,
-                self.dark,
+                np.cos(np.radians(self.roll_angle)),
+                np.sin(np.radians(self.roll_angle)),
                 np.ones(len(self.bjd_time)),
+            ]).T
+
+        if self.extra_basis_vectors is not None:
+            X = np.vstack([
+                X.T, self.extra_basis_vectors,
             ]).T
 
         return X[~self.mask]
@@ -377,16 +401,13 @@ class JointLightCurve(object):
             Named tuple containing the concatenated contents of the
             JointLightCurve object.
         """
-        extra_attrs = ['time', 'mask']
-        c = namedtuple('ConcatenatedLightCurve', self.attrs + extra_attrs)
-        for attr in self.attrs + extra_attrs:
-            if attr != 'time':
+        c = CheopsLightCurve(time=Time(np.concatenate([lc.time.jd
+                                                      for lc in self]),
+                                      format='jd'),
+                             mask=np.concatenate([lc.mask for lc in self]))
+        for attr in self.attrs:
                 setattr(c, attr, np.concatenate([getattr(lc, attr)
                                                  for lc in self]))
-            else:
-                setattr(c, attr, Time(np.concatenate([getattr(lc, attr).jd
-                                                      for lc in self]),
-                                      format='jd'))
         return c
 
     def _pad_shapes(self):
@@ -395,7 +416,7 @@ class JointLightCurve(object):
             shapes.append(np.count_nonzero(~lc.mask))
         return shapes
 
-    def combined_design_matrix(self, design_matrices=None):
+    def combined_design_matrix(self, design_matrices=None, norm=True):
         """
         Generate the combined design matrix, from a list of design matrices, one
         per visit.
@@ -414,7 +435,7 @@ class JointLightCurve(object):
         """
 
         if design_matrices is None:
-            design_matrices = [lc.design_matrix() for lc in self]
+            design_matrices = [lc.design_matrix(norm=norm) for lc in self]
 
         shapes = self._pad_shapes()
         ndim = design_matrices[0].shape[1]
