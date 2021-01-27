@@ -1,5 +1,4 @@
 import os
-from collections import namedtuple
 from glob import glob
 
 import matplotlib.pyplot as plt
@@ -14,7 +13,7 @@ from .linalg import linreg, RegressionResult
 
 __all__ = ['CheopsLightCurve', 'JointLightCurve']
 
-attrs = [
+attrs = [  # These vectors are from DRP
     "background",
     "bjd_time",
     "centroid_x",
@@ -33,7 +32,12 @@ attrs = [
     "smearing_lc_err",
     "status",
     "utc_time"
+] + [  # These vectors are from PIPE
+    "u0",
+    "u1",
+    "u2"
 ]
+
 
 def normalize(vector):
     """
@@ -71,11 +75,19 @@ class CheopsLightCurve(object):
                     key in [i.name.lower() for i in self.recs.columns]):
                 setattr(self, key, self.recs[key])
 
+            # Catch case for renamed roll angle key in the PIPE outputs
+            elif (hasattr(self.recs, 'columns') and
+                    'roll' in [i.name.lower() for i in self.recs.columns]):
+                setattr(self, 'roll_angle', self.recs['roll'])
+
         self.time = (Time(self.bjd_time, format='jd')
                      if hasattr(self, 'bjd_time') else time)
 
-        self.mask = (np.isnan(self.flux) | self.status.astype(bool) |
-                     self.event.astype(bool)) if hasattr(self, 'flux') else mask
+        if hasattr(self, 'status') and hasattr(self, 'event'):
+            self.mask = (np.isnan(self.flux) | self.status.astype(bool) |
+                         self.event.astype(bool)) if hasattr(self, 'flux') else mask
+        else:
+            self.mask = np.isnan(self.flux) if hasattr(self, 'flux') else mask
 
         if hasattr(self, 'flux') and norm:
             self.fluxerr = self.fluxerr / np.nanmedian(self.flux)
@@ -372,7 +384,8 @@ class JointLightCurve(object):
                       light_curves[0].recs.dtype.fields]
 
         for attr in self.attrs:
-            setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
+            if hasattr(self, attr):
+                setattr(self, attr, [getattr(lc, attr) for lc in light_curves])
 
     @classmethod
     def from_example(cls, norm=True):
@@ -403,11 +416,15 @@ class JointLightCurve(object):
         """
         c = CheopsLightCurve(time=Time(np.concatenate([lc.time.jd
                                                       for lc in self]),
-                                      format='jd'),
+                                       format='jd'),
                              mask=np.concatenate([lc.mask for lc in self]))
+
         for attr in self.attrs:
-                setattr(c, attr, np.concatenate([getattr(lc, attr)
-                                                 for lc in self]))
+            attr_to_concat = [getattr(lc, attr)
+                              for lc in self
+                              if hasattr(lc, attr)]
+            setattr(c, attr, np.concatenate(attr_to_concat)
+                    if len(attr_to_concat) > 0 else None)
         return c
 
     def _pad_shapes(self):
