@@ -11,7 +11,7 @@ from ..core import CheopsLightCurve
 from ..planets import Planet
 
 
-true_basis_vector_weights = [-2, 2, 1.1, 1, 25, 2, 3, 0.5, 0.1, 1e3]
+true_basis_vector_weights = [0.2, 0.5, 1.0]
 
 
 def simulate_roll_angle(phase, time, phase_offset=1.5):
@@ -65,10 +65,9 @@ def generate_recarray_55Cnce(seed=42, sinusoid_amp_depth_frac=0.25,
 
     model += sinusoid_amp * np.sin(2 * np.pi * (planet_phase + 0.5))
 
-    basis_vectors = ((bjd_time - bjd_time.mean()), background, conta_lc, dark,
-                     roll_angle/360, (centroid_x - location_x)**2,
-                     (centroid_y - location_y)**2, (centroid_x - location_x),
-                     (centroid_y - location_y), dark.mean())
+    basis_vectors = (np.cos(np.radians(roll_angle)),
+                     np.sin(np.radians(roll_angle)),
+                     np.ones(len(roll_angle)))
 
     flux = np.zeros_like(bjd_time)
 
