@@ -72,12 +72,12 @@ class CheopsLightCurve(object):
 
         for key in attrs:
             if (hasattr(self.recs, 'columns') and
-                    key in [i.name.lower() for i in self.recs.columns]):
-                setattr(self, key, self.recs[key])
+                    key in [i.lower() for i in self.recs.names]):
+                setattr(self, key, self.recs[key.upper()])
 
             # Catch case for renamed roll angle key in the PIPE outputs
             elif (hasattr(self.recs, 'columns') and
-                    'roll' in [i.name.lower() for i in self.recs.columns]):
+                    'roll' in [i.lower() for i in self.recs.names]):
                 setattr(self, 'roll_angle', self.recs['roll'])
 
         self.time = (Time(self.bjd_time, format='jd')
@@ -504,11 +504,13 @@ class JointLightCurve(object):
             Covariance matrix for the least squares estimators
             :math:`\sigma_{\hat{\beta}}^2`
         """
+        flux = np.concatenate([lc.flux for lc in self])
+        fluxerr = np.concatenate([lc.fluxerr for lc in self])
         mask = np.concatenate([lc.mask for lc in self])
 
         b, c = linreg(design_matrix,
-                      np.concatenate(self.flux)[~mask],
-                      np.concatenate(self.fluxerr)[~mask])
+                      flux[~mask],
+                      fluxerr[~mask])
 
         return RegressionResult(design_matrix, b, c)
 
