@@ -1,9 +1,8 @@
 linea
 -----
 
-.. image:: https://travis-ci.com/bmorris3/linea.svg?branch=master
-    :target: https://travis-ci.com/bmorris3/linea
-    :alt: Testing status
+.. image:: https://github.com/bmorris3/linea/workflows/CI%20Tests/badge.svg
+    :target: https://github.com/bmorris3/linea/actions
 
 .. image:: https://readthedocs.org/projects/linea/badge/?version=latest
     :target: https://linea.readthedocs.io/en/latest/?badge=latest
